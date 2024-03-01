@@ -22,7 +22,7 @@
 <style>
 .sidebar {
     height: 100%;
-    width: 250px;
+    width: 15%;
     position: fixed;
     top: 0;
     left: 0;

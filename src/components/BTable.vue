@@ -1,8 +1,5 @@
 <template>
-    <div class="custom-table">
-        <b-table :data="this.tableData" :columns="columns"></b-table>
-    </div>
-     
+        <b-table :data="tableData" :columns="columns" class="custom-table"></b-table>
 </template>
 
 
@@ -14,24 +11,27 @@
                 {
                     field: 'timestamp',
                     label: 'TIMESTAMP',
-                    width: '200',
-                    numeric: true
+                    width: '20%',
+                    numeric: true,
+                    thClass: 'text-left'
                 },
                 {
                     field: 'ip_details',
                     label: 'IP DETAILS',
-                    width: '200'
+                    width: '20%',
+                    thClass: 'text-center'
                 },
                 {
                     field: 'command',
                     label: 'COMMAND',
-                    width: '200'
+                    width: '20%',
+                    thClass: 'text-center'
                 },
                 {
                     field: 'content',
                     label: 'CONTENT',
-                    width: '500',
-                    center: true
+                    width: '40%',
+                    thClass: 'text-center'
                 }
             ]
         }
@@ -42,9 +42,7 @@
 </script>
 
 <style scoped>
-.custom-table{
-    background-color:  hsl(207, 35%, 74%);
-    color: red;
+  .custom-table {
+  width: 100%; 
 }
-
 </style>

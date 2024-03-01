@@ -1,12 +1,11 @@
 <template>
-    <div class="container">
         <BTable :tableData="this.data" />
-    </div>
 </template>
 
 <script>
 import BTable from "./BTable.vue";
 import { connectWebSocket, closeWebSocket } from "../websoc";
+
 
 export default {
 
@@ -50,4 +49,5 @@ export default {
 </script>
 
 
-<style></style>
+<style scoped>
+</style>
