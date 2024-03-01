@@ -31,23 +31,33 @@ public class ServerWebSocket {
 
 		if (jsonObject.has("redis_log")) {
 			System.out.println("Found redis_log key:");
-			JsonDataQueue.redisDataQ.add(jsonObject.get("redis_log").toString());
+			String data = jsonObject.get("redis_log").toString();
+			JsonDataQueue.redisDataQ.add(data);
+			DBFunc.insertLogToDb(data, "redis_logs");
 		} 
-		else if (jsonObject.has("njinix_logs")) {
-			System.out.println("Found njinix_logs key:");
-			JsonDataQueue.njinixDataQ.add(jsonObject.get("njinix_logs").toString());
+		else if (jsonObject.has("nginx_logs")) {
+			System.out.println("Found nginx_logs key:");
+			String data = jsonObject.get("nginx_logs").toString();
+			JsonDataQueue.nginxDataQ.add(data);
+			DBFunc.insertLogToDb(data, "nginx_logs");
 		}
 		else if (jsonObject.has("mysql_logs")) {
 			System.out.println("Found mysql_logs key:");
-			JsonDataQueue.mysqlDataQ.add(jsonObject.get("mysql_logs").toString());
+			String data = jsonObject.get("mysql_logs").toString();
+			JsonDataQueue.mysqlDataQ.add(data);
+			DBFunc.insertLogToDb(data, "mysql_logs");
 		}
 		else if (jsonObject.has("dns_logs")) {
 			System.out.println("Found dns_logs key:");
-			JsonDataQueue.dnsDataQ.add(jsonObject.get("dns_logs").toString());
+			String data = jsonObject.get("dns_logs").toString();
+			JsonDataQueue.dnsDataQ.add(data);
+			DBFunc.insertLogToDb(data, "dns_logs");
 		}
 		else if (jsonObject.has("kvm_logs")) {
 			System.out.println("Found kvm_logs key:");
-			JsonDataQueue.kvmDataQ.add(jsonObject.get("kvm_logs").toString());
+			String data = jsonObject.get("kvm_logs").toString();
+			JsonDataQueue.kvmDataQ.add(data);
+			DBFunc.insertLogToDb(data, "kvm_logs");
 		}
 		else {
 			System.out.println("Expected logs key not found");

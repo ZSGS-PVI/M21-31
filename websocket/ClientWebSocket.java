@@ -52,32 +52,34 @@ public class ClientWebSocket {
 	}
 
 	private void sendDataToClient() {
-		String queryString = session.getQueryString();
-		System.out.println(queryString);
-		String paramV = queryString.split("=")[1];
+	    String queryString = session.getQueryString();
+	    System.out.println(queryString);
+	    String paramV = queryString.split("=")[1];
 
-		while (true) {
-			try {
-				String data = getData(paramV);
-				if (data != null) {
-					session.getBasicRemote().sendText(data);
-				} else {
-					// Handle the case where data is null
-					System.out.println("No data available for " + paramV);
-				}
-			} catch (IOException | InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
+	    while (session.isOpen()) { // Check if the session is open
+	        try {
+	            String data = getData(paramV);
+	            if (data != null) {
+	                session.getBasicRemote().sendText(data);
+	            } 
+//	            else {
+//	                // Handle the case where data is null
+//	                System.out.println("No data available for " + paramV);
+//	            }
+	        } catch (IOException | InterruptedException e) {
+	            e.printStackTrace();
+	        }
+	    }
 	}
+
 
 	private String getData(String paramV) throws InterruptedException, IOException {
 		String data = null;
 
 		if (paramV.equals("redis-log")) {
 			data = JsonDataQueue.redisDataQ.poll();
-		} else if (paramV.equals("njinix_logs")) {
-			data = JsonDataQueue.njinixDataQ.poll();
+		} else if (paramV.equals("nginx_logs")) {
+			data = JsonDataQueue.nginxDataQ.poll();
 		} else if (paramV.equals("mysql_logs")) {
 			data = JsonDataQueue.mysqlDataQ.poll();
 		} else if (paramV.equals("dns_logs")) {
