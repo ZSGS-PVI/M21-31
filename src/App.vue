@@ -52,7 +52,6 @@ body{
 
 .app-heading {
   font-size: 24px;
-  color: hsl(207, 35%, 74%);
   text-align: center;
 }
 

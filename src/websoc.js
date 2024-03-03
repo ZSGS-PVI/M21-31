@@ -1,3 +1,6 @@
+import axios from 'axios';
+
+
 let socket = null;
 let onDataReceivedCallback = null;
 
@@ -40,3 +43,21 @@ export const closeWebSocket = () => {
         socket.close();
     }
 };
+
+
+
+
+export const getLogs = (tableName) => {
+
+    axios.get(`http://localhost:8087/RedisWebSoc/getlogs?table=${tableName}`)
+        .then(response => {
+            console.log(response.data)
+            const dataArray = [];
+            dataArray.push(JSON.parse(response.data));
+            console.log(dataArray);
+            return dataArray;
+        })
+        .catch(e => {
+            console.log(e);
+        });
+}
