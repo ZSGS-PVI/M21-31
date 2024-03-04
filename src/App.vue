@@ -36,7 +36,7 @@ body{
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
+  color: #01070c;
   height: 100vh;
 }
 
@@ -60,17 +60,12 @@ body{
 }
 
 .container-fluid {
-  height: 100%; /* Ensure container takes full height of its parent */
+  height: 100%; 
 }
 
-.table-cont {
-  background-color: hsl(207, 35%, 74%);
-  padding: 20px;
-  min-height: 100vh; 
-}
 
 .col-lg-3, .col-lg-9 {
-  height: 100%; /* Ensure columns take full height of their parent */
+  height: 100%; 
 }
 </style>
 

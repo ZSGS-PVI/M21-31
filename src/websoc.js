@@ -47,17 +47,16 @@ export const closeWebSocket = () => {
 
 
 
-export const getLogs = (tableName) => {
+export const getLogs = async (tableName) => {
 
-    axios.get(`http://localhost:8087/RedisWebSoc/getlogs?table=${tableName}`)
-        .then(response => {
-            console.log(response.data)
-            const dataArray = [];
-            dataArray.push(JSON.parse(response.data));
-            console.log(dataArray);
-            return dataArray;
-        })
-        .catch(e => {
-            console.log(e);
-        });
+    try {
+        const response = await axios.get(`http://localhost:8087/RedisWebSoc/getlogs?table=${tableName}`);
+        const data = await response.data;
+      //  console.log(data)
+        return data;
+    } catch (error) {
+        console.error(error);
+        throw error; // re-throw the error to propagate it to the caller
+    }
+
 }
