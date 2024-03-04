@@ -1,16 +1,16 @@
 package main
 
 import (
-	"bufio"
 	"encoding/json"
+	"fmt"
 	"log"
-	"os"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/hpcloud/tail"
 )
 
 type NginxLogEntry struct {
@@ -56,35 +56,29 @@ func main() {
 	}
 	defer conn.Close()
 
+	// Ticker for reading log file at regular intervals 
+	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
+
 	// Continuously read the Nginx access log file and send the parsed log entries over WebSocket
-	for {
+	for range ticker.C {
 		processLogFile(logFilePath, conn)
-		time.Sleep(1 * time.Second)
 	}
 }
 
 // processLogFile reads the Nginx access log file, parses log entries, and sends them over WebSocket
 func processLogFile(logFilePath string, conn *websocket.Conn) {
 	// Open the Nginx access log file
-	file, err := os.Open(logFilePath)
+	tailConfig := tail.Config{Location: &tail.SeekInfo{Offset: lastOffset, Whence: 0}, ReOpen: true, Follow: true}
+	t, err := tail.TailFile(logFilePath, tailConfig)
 	if err != nil {
 		log.Fatalf("Error opening log file: %v", err)
 	}
-	defer file.Close()
+	defer t.Stop()
 
-	// Seek to the last known position in the log file
-	_, err = file.Seek(lastOffset, 0)
-	if err != nil {
-		log.Fatalf("Error seeking file: %v", err)
-	}
-
-	// Create a scanner to read the log file
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := scanner.Text()
-
+	for line := range t.Lines {
 		// Parse each log entry into JSON format
-		logEntry, err := parseLogEntry(line)
+		logEntry, err := parseLogEntry(line.Text)
 		if err != nil {
 			log.Printf("Error parsing log entry: %v", err)
 			continue
@@ -103,7 +97,7 @@ func processLogFile(logFilePath string, conn *websocket.Conn) {
 			continue
 
 		}
-
+		fmt.Println(logEntry)
 		// Send the JSON data over WebSocket connection
 		err = conn.WriteMessage(websocket.TextMessage, jsonData)
 		if err != nil {
@@ -114,13 +108,6 @@ func processLogFile(logFilePath string, conn *websocket.Conn) {
 		// Mark log entry as processed
 		markProcessed(entryID)
 	}
-
-	// Get the current file offset
-	fileInfo, err := file.Stat()
-	if err != nil {
-		log.Fatalf("Error getting file info: %v", err)
-	}
-	lastOffset = fileInfo.Size()
 }
 
 // parseLogEntry parses a single log entry from Nginx log format into a LogEntry struct
