@@ -16,7 +16,6 @@ public class ServerWebSocket {
 	@OnOpen
 	public void onOpen(Session session) {
 		System.out.println("write web socket con called!!");
-
 	}
 
 	@OnMessage
@@ -28,10 +27,11 @@ public class ServerWebSocket {
 		Gson gson = new Gson();
 
 		JsonObject jsonObject = gson.fromJson(message, JsonObject.class);
-
+		
 		if (jsonObject.has("redis_log")) {
 			System.out.println("Found redis_log key:");
 			String data = jsonObject.get("redis_log").toString();
+			
 			JsonDataQueue.redisDataQ.add(data);
 			DBFunc.insertLogToDb(data, "redis_logs");
 		} 
@@ -40,6 +40,7 @@ public class ServerWebSocket {
 			String data = jsonObject.get("nginx_logs").toString();
 			JsonDataQueue.nginxDataQ.add(data);
 			DBFunc.insertLogToDb(data, "nginx_logs");
+			System.out.println(data);
 		}
 		else if (jsonObject.has("mysql_logs")) {
 			System.out.println("Found mysql_logs key:");
@@ -60,6 +61,7 @@ public class ServerWebSocket {
 			DBFunc.insertLogToDb(data, "kvm_logs");
 		}
 		else {
+			System.out.println(jsonObject.toString());
 			System.out.println("Expected logs key not found");
 		}
 

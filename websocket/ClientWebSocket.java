@@ -2,6 +2,7 @@ package com.websocket;
 
 import java.io.IOException;
 
+import jakarta.websocket.CloseReason;
 import jakarta.websocket.OnClose;
 import jakarta.websocket.OnError;
 import jakarta.websocket.OnMessage;
@@ -29,7 +30,15 @@ public class ClientWebSocket {
 
 	@OnClose
 	public void onClose(Session session) {
-		System.out.println("WebSocket connection closed: " + session.getId());
+		 try {
+	            if (session != null && session.isOpen()) {
+	                session.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "Session terminated."));
+	            }
+	        } catch (Exception e) {
+	            // Handle any exceptions
+	            e.printStackTrace();
+	        }
+		System.out.println("WebSocket connection closed: ");
 	}
 
 	@OnError
@@ -41,9 +50,8 @@ public class ClientWebSocket {
 	@OnMessage
 	public void onMessage(String message, Session session) {
 
-		// You can process the received JSON message here
-
-		// Example: Convert JSON message back to object
+		System.out.println("Messages received from client :"+message);
+		
 		/*
 		 * ObjectMapper mapper = new ObjectMapper(); try { LogEntry logEntry =
 		 * mapper.readValue(message, LogEntry.class); // Process the log entry object as
@@ -61,6 +69,7 @@ public class ClientWebSocket {
 	            String data = getData(paramV);
 	            if (data != null) {
 	                session.getBasicRemote().sendText(data);
+	                System.out.println(data);
 	            } 
 //	            else {
 //	                // Handle the case where data is null
@@ -76,7 +85,7 @@ public class ClientWebSocket {
 	private String getData(String paramV) throws InterruptedException, IOException {
 		String data = null;
 
-		if (paramV.equals("redis-log")) {
+		if (paramV.equals("redis_logs")) {
 			data = JsonDataQueue.redisDataQ.poll();
 		} else if (paramV.equals("nginx_logs")) {
 			data = JsonDataQueue.nginxDataQ.poll();
