@@ -2,7 +2,7 @@
     <div class="">
         <h1 class="table-heading">Redis Logs</h1>
         <TableView :liveTableData="liveTableData" :logsTableData="logsTableData" :columns="columns"
-            @fetch-logs-data="fetchLogsDataFromChild" />
+            @fetch-logs-data="fetchLogsDataFromChild" @tab-change="logTabChange"/>
     </div>
 </template>
   
@@ -27,8 +27,8 @@ export default {
                     thClass: 'text-left'
                 },
                 {
-                    field: 'ip_details',
-                    label: 'IP DETAILS',
+                    field: 'addr_details',
+                    label: 'ADDR DETAILS',
                     width: '20%',
                     thClass: 'text-center'
                 },
@@ -53,7 +53,7 @@ export default {
             if (jsonObject && Object.keys(jsonObject).length > 0) {
                 const objDet = {
                     timestamp: jsonObject.timestamp,
-                    ip_details: jsonObject.ip_details,
+                    addr_details: `ip: ${jsonObject.addr_details.ip}, port:${jsonObject.addr_details.port}`,
                     command: jsonObject.command,
                     content: `ID: ${jsonObject.content.id}, DEPT: ${jsonObject.content.dept}, NAME: ${jsonObject.content.name}, SALARY: ${jsonObject.content.salary}`
                 };
@@ -74,7 +74,6 @@ export default {
         },
 
         async fetchLogsDataFromChild() {
-            this.logsTableData = [];
             try {
                 const jsonArray = await getLogs("redis_logs");
                 console.log(jsonArray);
@@ -87,6 +86,10 @@ export default {
             } catch (error) {
                 console.error(error);
             }
+        },
+        logTabChange(){
+            this.liveTableData = [];
+            this.logsTableData = [];
         }
 
     },

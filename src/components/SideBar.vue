@@ -4,10 +4,11 @@
             M21-31
         </h1>
         <div class="link-cont">
-            <router-link to="/"  :class="{ 'active': $route.path === '/' }">REDIS-LOGS</router-link>
+            <router-link to="/" :class="{ 'active': $route.path === '/' }">REDIS-LOGS</router-link>
             <router-link to="/njinix-logs" :class="{ 'active': $route.path === '/njinix-logs' }">NginX-LOGS</router-link>
-            <router-link to="/mysql-logs"  :class="{ 'active': $route.path === '/mysql-logs' }">MySql-LOGS</router-link>
-            <router-link to="/vbox-logs"  :class="{ 'active': $route.path === '/vbox-logs' }">VirtualBox-LOGS</router-link>
+            <router-link to="/mysql-logs" :class="{ 'active': $route.path === '/mysql-logs' }">MySql-LOGS</router-link>
+            <router-link to="/vbox-logs" :class="{ 'active': $route.path === '/vbox-logs' }">VirtualBox-LOGS</router-link>
+            <router-link to="/dns-logs" :class="{ 'active': $route.path === '/dns-logs' }">DNS-LOGS</router-link>
         </div>
 
     </div>
@@ -51,6 +52,7 @@
 .link-cont {
     margin-top: 20px;
 }
+
 .active {
     background-color: #555;
 }

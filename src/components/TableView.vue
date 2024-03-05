@@ -47,6 +47,7 @@ export default {
     },
     methods: {
         async handleTabChange() {
+            this.$emit('tab-change')
             console.log("handle ")
             if (this.activeTab === 1 ) {
                 this.$emit('fetch-logs-data');

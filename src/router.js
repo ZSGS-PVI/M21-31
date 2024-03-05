@@ -4,6 +4,8 @@ import RedisLogTable from '@/components/RedisLogTable'
 import MysqlLogs from '@/components/MysqlLogs'
 import NjinixLogs from '@/components/NjinixLogs'
 import VirtualBoxLogs from '@/components/VirtualBoxLogs'
+import DNSLogs from "@/components/DNSLogs"
+
 
 Vue.use(VueRouter)
 
@@ -28,6 +30,11 @@ export default new VueRouter({
         path: '/vbox-logs',
         name: 'VirtualBoxLogs',
         component: VirtualBoxLogs
+      },
+      {
+        path: '/dns-logs',
+        name: 'DNSLogs',
+        component: DNSLogs
       },
   ]
 })
