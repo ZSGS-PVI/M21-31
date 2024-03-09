@@ -50,20 +50,14 @@ func main() {
 		return
 	}
 
-	dialer := websocket.Dialer{
-		HandshakeTimeout: 10 * time.Second,
-		ReadBufferSize:   12000000,
-		WriteBufferSize:  12000000,
-		Proxy:            nil,
-		TLSClientConfig:  nil,
-	}
-
 	// WebSocket connection to Java servlet
-	conn, _, err := dialer.Dial("ws://localhost:8087/RedisWebSoc/serverws", nil)
+	conn, _, err := websocket.DefaultDialer.Dial("ws://localhost:8087/RedisWebSoc/serverws", nil)
 	if err != nil {
 		log.Fatal("dial:", err)
 	}
 	defer conn.Close()
+
+	count := 0
 
 	scanner := bufio.NewScanner(stdout)
 	//	var addrSlice []AddrDetail
@@ -98,39 +92,23 @@ func main() {
 			continue
 		}
 
-		timestampParts := strings.Split(timestamp, ".")
-		if len(timestampParts) != 2 {
-			log.Printf("Invalid Unix timestamp: %s\n", timestamp)
-			continue
-		}
-
-		secondsStr := timestampParts[0]
-		millisecondsStr := timestampParts[1]
-
-		// Parse seconds part
-		seconds, err := strconv.ParseInt(secondsStr, 10, 64)
+		// Convert timestamp to a float64
+		timestampFloat, err := strconv.ParseFloat(timestamp, 64)
 		if err != nil {
-			log.Printf("Error parsing seconds: %v\n", err)
+			log.Printf("Error converting timestamp to float64: %v, Timestamp: %s\n", err, timestamp)
 			continue
 		}
 
-		// Parse milliseconds part
-		milliseconds, err := strconv.ParseInt(millisecondsStr, 10, 64)
-		if err != nil {
-			log.Printf("Error parsing milliseconds: %v\n", err)
-			continue
-		}
+		// Convert Unix timestamp to a time.Time value
+		t := time.Unix(int64(timestampFloat), int64((timestampFloat-float64(int64(timestampFloat)))*1e9))
 
-		// Combine seconds and milliseconds to create Unix timestamp in nanoseconds
-		unixTimestamp := seconds*1000000000 + milliseconds*1000000
+		// Format the time with fractional seconds
+		formattedTime := t.Format("2006-01-02 15:04:05.999999999")
 
-		// Convert Unix timestamp to time.Time
-		timestampTime := time.Unix(0, unixTimestamp)
-
-		// Print timestamp in desired format
-		fmt.Println("Timestamp:", timestampTime.Format("2006/01/02 15:04:05.999999999"))
+		// Print the formatted time
+		//fmt.Println("Formatted time:", formattedTime)
 		logEntry := LogEntry{
-			Timestamp: timestampTime.Format("2006/01/02 15:04:05.999999999"),
+			Timestamp: formattedTime,
 			IPDetails: AddrDetail{addr[0], port},
 			Command:   command,
 			Content:   content,
@@ -148,9 +126,8 @@ func main() {
 		}
 
 		fmt.Println(string(jsonData))
-
-		fmt.Println(1)
-
+		//fmt.Println(count)
+		count++
 		// Send the JSON data over WebSocket connection
 		err = conn.WriteMessage(websocket.TextMessage, jsonData)
 		if err != nil {

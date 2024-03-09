@@ -18,10 +18,14 @@
 // }
 
 // type LogEntry struct {
-// 	Timestamp string  `json:"timestamp"`
-// 	IPDetails string  `json:"ip_details"`
-// 	Command   string  `json:"command"`
-// 	Content   Content `json:"content"`
+// 	Timestamp string     `json:"timestamp"`
+// 	IPDetails AddrDetail `json:"addr_details"`
+// 	Command   string     `json:"command"`
+// 	Content   Content    `json:"content"`
+// }
+// type AddrDetail struct {
+// 	IP   string `json:"ip"`
+// 	Port int    `json:"port"`
 // }
 
 // type Content struct {
@@ -62,6 +66,7 @@
 // 	defer conn.Close()
 
 // 	scanner := bufio.NewScanner(stdout)
+// 	//	var addrSlice []AddrDetail
 // 	for scanner.Scan() {
 // 		line := scanner.Text()
 // 		if line == "OK" {
@@ -75,7 +80,11 @@
 // 		}
 
 // 		timestamp := parts[0]
-// 		ipDetails := strings.Join(parts[1:3], " ")
+// 		ipDetails := strings.Trim(parts[2], "[]")
+// 		addr := strings.Split(ipDetails, ":")
+// 		port, _ := strconv.Atoi(addr[1])
+// 		//addrSlice = append(addrSlice, AddrDetail{addr[0], port})
+
 // 		command := parts[3]
 // 		jsonStr := parts[len(parts)-1]
 
@@ -122,7 +131,7 @@
 // 		fmt.Println("Timestamp:", timestampTime.Format("2006/01/02 15:04:05.999999999"))
 // 		logEntry := LogEntry{
 // 			Timestamp: timestampTime.Format("2006/01/02 15:04:05.999999999"),
-// 			IPDetails: ipDetails,
+// 			IPDetails: AddrDetail{addr[0], port},
 // 			Command:   command,
 // 			Content:   content,
 // 		}
@@ -139,6 +148,7 @@
 // 		}
 
 // 		fmt.Println(string(jsonData))
+
 // 		fmt.Println(1)
 
 // 		// Send the JSON data over WebSocket connection
