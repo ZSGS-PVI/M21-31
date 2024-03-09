@@ -2,13 +2,13 @@
     <div class="">
         <h1 class="table-heading">Redis Logs</h1>
         <TableView :liveTableData="liveTableData" :logsTableData="logsTableData" :columns="columns"
-            @fetch-logs-data="fetchLogsDataFromChild" @tab-change="logTabChange"/>
+            @fetch-logs-data="fetchLogsDataFromChild" @tab-change="logTabChange" />
     </div>
 </template>
   
 <script>
 import TableView from "./TableView.vue";
-import { connectWebSocket, closeWebSocket, getLogs } from "../websoc";
+import { connectWebSocket, closeWebSocket, getLogs} from "../websoc";
 
 export default {
     components: {
@@ -49,7 +49,7 @@ export default {
     },
     methods: {
         addData(jsonObject, tableType) {
-            console.log(jsonObject)
+           //  console.log(jsonObject)
             if (jsonObject && Object.keys(jsonObject).length > 0) {
                 const objDet = {
                     timestamp: jsonObject.timestamp,
@@ -58,9 +58,13 @@ export default {
                     content: `ID: ${jsonObject.content.id}, DEPT: ${jsonObject.content.dept}, NAME: ${jsonObject.content.name}, SALARY: ${jsonObject.content.salary}`
                 };
                 if (tableType === 'live') {
+                    if(this.liveTableData.length >= 10){
+                        this.liveTableData.pop();
+                    }
                     this.liveTableData.unshift(objDet)
+                    //console.log(this.liveTableData);
                 } else {
-                    console.log(objDet)
+                    // console.log(objDet)
                     this.logsTableData.unshift(objDet)
                 }
 
@@ -69,13 +73,13 @@ export default {
 
 
         handleDataReceived(data) {
-            console.log("Received data from WebSocket:", data);
+            // console.log("Received data from WebSocket:", data);
             this.addData(data, "live");
         },
 
-        async fetchLogsDataFromChild() {
+        async fetchLogsDataFromChild(offset) {
             try {
-                const jsonArray = await getLogs("redis_logs");
+                const jsonArray = await getLogs("redis_logs", offset);
                 console.log(jsonArray);
 
                 if (!jsonArray || jsonArray === '') {
@@ -90,8 +94,7 @@ export default {
         logTabChange(){
             this.liveTableData = [];
             this.logsTableData = [];
-        }
-
+        },
     },
     created() {
         connectWebSocket(this.handleDataReceived, "redis_logs");

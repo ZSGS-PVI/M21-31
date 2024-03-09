@@ -1,10 +1,17 @@
 <template>
-    <div>
-        <b-tabs ref="tabs" v-model="activeTab" @input="handleTabChange">
-            <TabItem label="Live" :data="liveTableData" :columns="columns" :perPage="perPage" :currentPage="currentPage" :totalRows="liveTotalRows" class="custom-table" />
-            <TabItem label="Logs" :data="logsTableData" :columns="columns" :perPage="perPage" :currentPage="currentPage" :totalRows="logsTotalRows" class="custom-table" />
-        </b-tabs>
-        <b-pagination v-model="currentPage" :total="currentTotalRows" :per-page="perPage"></b-pagination>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <b-tabs ref="tabs" v-model="activeTab">
+                    <TabItem label="Live" :data="liveTableData" :columns="columns" class="custom-table" />
+                    <TabItem label="Logs" :data="logsTableData" :columns="columns" class="custom-table" />
+                </b-tabs>
+                <div v-if="activeTab === 1" class="button-container">
+                    <button @click="prevPage" class="btn btn-primary button">Prev</button>
+                    <button @click="nextPage" class="btn btn-primary button">Next</button>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -18,45 +25,45 @@ export default {
     data() {
         return {
             activeTab: 0,
-            perPage: 10,
-            currentPage: 1,
-            liveTotalRows: 0,
-            logsTotalRows: 0,
+            offset:0,
         };
     },
-    props: ['liveTableData', 'logsTableData', 'columns'],
-    computed: {
-        currentTotalRows() {
-            return this.activeTab === 0 ? this.liveTotalRows : this.logsTotalRows;
-        }
-    },
+    props: ['columns', 'liveTableData', 'logsTableData'],
     watch: {
-        liveTableData(newVal) {
-            if (newVal) {
-                this.liveTotalRows = newVal.length;
-            }
-        },
-        logsTableData(newVal) {
-            if (newVal) {
-                this.logsTotalRows = newVal.length;
-            }
-        },
         activeTab() {
-            this.currentPage = 1;
+            this.$emit('tab-change');
+            if (this.activeTab === 1 ) {
+                this.$emit('fetch-logs-data', this.offset);
+            }
         }
     },
     methods: {
-        async handleTabChange() {
-            this.$emit('tab-change')
-            console.log("handle ")
-            if (this.activeTab === 1 ) {
-                this.$emit('fetch-logs-data');
+        prevPage() {
+            if(this.offset>10){
+                this.offset -= 10;
+                this.callParentM();
             }
+
+        },
+        nextPage() {
+            this.offset += 10;
+            this.callParentM();
+        },
+        callParentM(){
+            this.$emit('tab-change');
+            this.$emit('fetch-logs-data', this.offset);
         }
     }
 };
 </script>
 
 <style>
-
+.button-container {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+}
+.button{
+    margin: 10px;
+}
 </style>
