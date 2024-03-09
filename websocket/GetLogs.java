@@ -19,8 +19,12 @@ public class GetLogs extends HttpServlet {
 			throws ServletException, IOException {
 
 		String tableName = request.getParameter("table");
+		int offset = Integer.parseInt(request.getParameter("offset"));
 
-		List<String> logs = DBFunc.getLogs(tableName);
+		System.out.println(tableName);
+		System.out.println(offset);
+		
+		List<String> logs = DBFunc.getLogs(tableName, offset);
 
 		Gson gson = new Gson();
 
@@ -29,7 +33,7 @@ public class GetLogs extends HttpServlet {
 		response.setContentType("application/json");
 
 		PrintWriter out = response.getWriter();
-		System.out.println(jsonData);
+		// System.out.println(jsonData);
 		out.println(jsonData);
 
 	}

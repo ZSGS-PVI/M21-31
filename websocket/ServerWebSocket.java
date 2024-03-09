@@ -31,7 +31,6 @@ public class ServerWebSocket {
 		if (jsonObject.has("redis_log")) {
 			System.out.println("Found redis_log key:");
 			String data = jsonObject.get("redis_log").toString();
-			
 			JsonDataQueue.redisDataQ.add(data);
 			DBFunc.insertLogToDb(data, "redis_logs");
 		} 
@@ -61,7 +60,7 @@ public class ServerWebSocket {
 			DBFunc.insertLogToDb(data, "kvm_logs");
 		}
 		else {
-			System.out.println(jsonObject.toString());
+			//System.out.println(jsonObject.toString());
 			System.out.println("Expected logs key not found");
 		}
 
@@ -70,6 +69,7 @@ public class ServerWebSocket {
 	@OnClose
 	public void onClose(Session session) {
 		// Handle closing of writer WebSocket connection
+		System.out.println("con closed!!");
 	}
 
 	@OnError

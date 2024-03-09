@@ -69,7 +69,7 @@ public class ClientWebSocket {
 	            String data = getData(paramV);
 	            if (data != null) {
 	                session.getBasicRemote().sendText(data);
-	                System.out.println(data);
+	                //System.out.println(data);
 	            } 
 //	            else {
 //	                // Handle the case where data is null
