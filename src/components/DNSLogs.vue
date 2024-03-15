@@ -1,14 +1,14 @@
 <template>
     <div class="">
-        <h1 class="table-heading">Redis Logs</h1>
+        <h1 class="table-heading">DNS Logs</h1>
         <TableView :liveTableData="liveTableData" :logsTableData="logsTableData" :columns="columns"
-            @fetch-logs-data="fetchLogsDataFromChild" @tab-change="logTabChange"/>
+            @fetch-logs-data="fetchLogsDataFromChild" @tab-change="logTabChange" @get-key="getPrimKey"/>
     </div>
 </template>
   
 <script>
 import TableView from "./TableView.vue";
-import { connectWebSocket, closeWebSocket, getLogs } from "../websoc";
+import { connectWebSocket, closeWebSocket, getLogs, getPrimaryKey } from "../websoc";
 
 export default {
     components: {
@@ -18,6 +18,7 @@ export default {
         return {
             liveTableData: [],
             logsTableData: [],
+            primaryKey:10,
             columns: [
                 {
                     field: 'timestamp',
@@ -27,20 +28,20 @@ export default {
                     thClass: 'text-left'
                 },
                 {
-                    field: 'addr_details',
-                    label: 'ADDR DETAILS',
+                    field: 'client_ip',
+                    label: 'CLIENT IP',
                     width: '20%',
                     thClass: 'text-center'
                 },
                 {
-                    field: 'command',
-                    label: 'COMMAND',
+                    field: 'query',
+                    label: 'QUERY',
                     width: '20%',
                     thClass: 'text-center'
                 },
                 {
-                    field: 'content',
-                    label: 'CONTENT',
+                    field: 'client_port',
+                    label: 'CLIENT PORT',
                     width: '40%',
                     thClass: 'text-center'
                 }
@@ -52,10 +53,10 @@ export default {
             console.log(jsonObject)
             if (jsonObject && Object.keys(jsonObject).length > 0) {
                 const objDet = {
-                    timestamp: jsonObject.timestamp,
-                    addr_details: `ip: ${jsonObject.addr_details.ip}, port:${jsonObject.addr_details.port}`,
-                    command: jsonObject.command,
-                    content: `ID: ${jsonObject.content.id}, DEPT: ${jsonObject.content.dept}, NAME: ${jsonObject.content.name}, SALARY: ${jsonObject.content.salary}`
+                    timestamp: jsonObject.query,
+                    client_ip: jsonObject.client_ip,
+                    query: jsonObject.query,
+                    client_port: jsonObject.client_port
                 };
                 if (tableType === 'live') {
                     this.liveTableData.unshift(objDet)
@@ -73,9 +74,9 @@ export default {
             this.addData(data, "live");
         },
 
-        async fetchLogsDataFromChild() {
+        async fetchLogsDataFromChild(offset) {
             try {
-                const jsonArray = await getLogs("redis_logs");
+                const jsonArray = await getLogs("dns_logs", offset);
                 console.log(jsonArray);
 
                 if (!jsonArray || jsonArray === '') {
@@ -90,11 +91,13 @@ export default {
         logTabChange(){
             this.liveTableData = [];
             this.logsTableData = [];
+        },
+        async getPrimKey(){
+            this.primaryKey =  await getPrimaryKey("dns_logs");
         }
-
     },
     created() {
-        connectWebSocket(this.handleDataReceived, "redis_logs");
+        connectWebSocket(this.handleDataReceived, "dns_logs");
     },
     beforeDestroy() {
         closeWebSocket();

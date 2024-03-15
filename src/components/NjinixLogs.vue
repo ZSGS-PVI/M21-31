@@ -1,63 +1,217 @@
 <template>
-    <div>
-      <el-table :data="visibleData" style="width: 100%">
-        <el-table-column v-for="(field, index) in visibleFields" :key="index" :prop="field.key" :label="field.label"></el-table-column>
-        <el-table-column label="MORE">
-          <template slot-scope="scope">
-            <el-button @click="showIndividualData(scope.row)" type="text" icon="el-icon-more"></el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-  
-      <el-drawer :visible="drawerVisible" direction="rtl" size="40%" @close="drawerVisible = false">
-        <el-table :data="drawerData" style="width: 100%">
-          <el-table-column prop="key" label="Element"></el-table-column>
-          <el-table-column prop="value" label="Value"></el-table-column>
-        </el-table>
-      </el-drawer>
+    <div class="">
+        <h1 class="table-heading">Nginx Logs</h1>
+        <TableView :liveTableData="liveTableData" :logsTableData="logsTableData" :primaryKey="primaryKey" :columns="columns"
+            @fetch-logs-data="fetchLogsDataFromChild" @tab-change="logTabChange" @get-key="getPrimKey"/>
     </div>
-  </template>
+</template>
   
-  <script>
-  export default {
-    data() {
-      return {
-        visibleFields: [
-          { key: "CLIENT IP", label: "CLIENT IP" },
-          { key: "REMOTE USER", label: "REMOTE USER" },
-          { key: "DATE & TIME", label: "DATE & TIME" },
-          { key: "REQUEST", label: "REQUEST" },
-          { key: "TARGET STATUS CODE", label: "TARGET STATUS CODE" },
-        ],
-        allFields: [
-          {"CLIENT IP":"127.0.0.1","REMOTE USER":"-","DATE & TIME":"[01/Mar/2024:16:55:42 +0530]","REQUEST":"GET / HTTP/1.1","TARGET STATUS CODE":304,"BODY BYTES SENT":0,"REFERER":"-","USER AGENT":"Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36","SSL PROTOCOL":"-","SSL CIPHER":"-","REQUEST PROCESSING TIME":"0.002","TARGET PROCESSING TIME":"0.004","RECEIVED BYTES":802,"TARGET IP:PORT":"127.0.0.1:8080","STATUS CODE FROM LOAD BALANCER":304,"BYTES SENT":138,"SNI DOMAIN":"localhost","HOST":"localhost","URI":"/","HTTP UPGRADE":"-"},
-          {"CLIENT IP":"127.0.0.1","REMOTE USER":"-","DATE & TIME":"[01/Mar/2024:16:55:42 +0530]","REQUEST":"GET / HTTP/1.1","TARGET STATUS CODE":304,"BODY BYTES SENT":0,"REFERER":"-","USER AGENT":"Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36","SSL PROTOCOL":"-","SSL CIPHER":"-","REQUEST PROCESSING TIME":"0.002","TARGET PROCESSING TIME":"0.004","RECEIVED BYTES":802,"TARGET IP:PORT":"127.0.0.1:8080","STATUS CODE FROM LOAD BALANCER":304,"BYTES SENT":138,"SNI DOMAIN":"localhost","HOST":"localhost","URI":"/","HTTP UPGRADE":"-"},
-          {"CLIENT IP":"127.0.0.1","REMOTE USER":"-","DATE & TIME":"[01/Mar/2024:16:55:42 +0530]","REQUEST":"GET / HTTP/1.1","TARGET STATUS CODE":304,"BODY BYTES SENT":0,"REFERER":"-","USER AGENT":"Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36","SSL PROTOCOL":"-","SSL CIPHER":"-","REQUEST PROCESSING TIME":"0.002","TARGET PROCESSING TIME":"0.004","RECEIVED BYTES":802,"TARGET IP:PORT":"127.0.0.1:8080","STATUS CODE FROM LOAD BALANCER":304,"BYTES SENT":138,"SNI DOMAIN":"localhost","HOST":"localhost","URI":"/","HTTP UPGRADE":"-"},
-          {"CLIENT IP":"127.0.0.1","REMOTE USER":"-","DATE & TIME":"[01/Mar/2024:16:55:42 +0530]","REQUEST":"GET / HTTP/1.1","TARGET STATUS CODE":304,"BODY BYTES SENT":0,"REFERER":"-","USER AGENT":"Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36","SSL PROTOCOL":"-","SSL CIPHER":"-","REQUEST PROCESSING TIME":"0.002","TARGET PROCESSING TIME":"0.004","RECEIVED BYTES":802,"TARGET IP:PORT":"127.0.0.1:8080","STATUS CODE FROM LOAD BALANCER":304,"BYTES SENT":138,"SNI DOMAIN":"localhost","HOST":"localhost","URI":"/","HTTP UPGRADE":"-"},
-          {"CLIENT IP":"127.0.0.1","REMOTE USER":"-","DATE & TIME":"[01/Mar/2024:16:55:42 +0530]","REQUEST":"GET / HTTP/1.1","TARGET STATUS CODE":304,"BODY BYTES SENT":0,"REFERER":"-","USER AGENT":"Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36","SSL PROTOCOL":"-","SSL CIPHER":"-","REQUEST PROCESSING TIME":"0.002","TARGET PROCESSING TIME":"0.004","RECEIVED BYTES":802,"TARGET IP:PORT":"127.0.0.1:8080","STATUS CODE FROM LOAD BALANCER":304,"BYTES SENT":138,"SNI DOMAIN":"localhost","HOST":"localhost","URI":"/","HTTP UPGRADE":"-"},
-          {"CLIENT IP":"127.0.0.1","REMOTE USER":"-","DATE & TIME":"[01/Mar/2024:16:55:42 +0530]","REQUEST":"GET / HTTP/1.1","TARGET STATUS CODE":304,"BODY BYTES SENT":0,"REFERER":"-","USER AGENT":"Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36","SSL PROTOCOL":"-","SSL CIPHER":"-","REQUEST PROCESSING TIME":"0.002","TARGET PROCESSING TIME":"0.004","RECEIVED BYTES":802,"TARGET IP:PORT":"127.0.0.1:8080","STATUS CODE FROM LOAD BALANCER":304,"BYTES SENT":138,"SNI DOMAIN":"localhost","HOST":"localhost","URI":"/","HTTP UPGRADE":"-"},
-          {"CLIENT IP":"127.0.0.1","REMOTE USER":"-","DATE & TIME":"[01/Mar/2024:16:55:42 +0530]","REQUEST":"GET / HTTP/1.1","TARGET STATUS CODE":304,"BODY BYTES SENT":0,"REFERER":"-","USER AGENT":"Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36","SSL PROTOCOL":"-","SSL CIPHER":"-","REQUEST PROCESSING TIME":"0.002","TARGET PROCESSING TIME":"0.004","RECEIVED BYTES":802,"TARGET IP:PORT":"127.0.0.1:8080","STATUS CODE FROM LOAD BALANCER":304,"BYTES SENT":138,"SNI DOMAIN":"localhost","HOST":"localhost","URI":"/","HTTP UPGRADE":"-"},
+<script>
+import TableView from "./TableView.vue";
+import { connectWebSocket, closeWebSocket, getLogs, getPrimaryKey} from "../websoc";
 
-            {"CLIENT IP":"127.0.0.1","REMOTE USER":"-","DATE & TIME":"[01/Mar/2024:16:55:42 +0530]","REQUEST":"GET / HTTP/1.1","TARGET STATUS CODE":304,"BODY BYTES SENT":0,"REFERER":"-","USER AGENT":"Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36","SSL PROTOCOL":"-","SSL CIPHER":"-","REQUEST PROCESSING TIME":"0.002","TARGET PROCESSING TIME":"0.004","RECEIVED BYTES":802,"TARGET IP:PORT":"127.0.0.1:8080","STATUS CODE FROM LOAD BALANCER":304,"BYTES SENT":138,"SNI DOMAIN":"localhost","HOST":"localhost","URI":"/","HTTP UPGRADE":"-"}
-          // Add more data objects as needed
-        ],
-        visibleData: [],
-        drawerVisible: false,
-        drawerData: [],
-      };
+export default {
+    components: {
+        TableView
     },
-    created() {
-      this.visibleData = this.allFields; 
+    data() {
+        return {
+            liveTableData: [],
+            logsTableData: [],
+            primaryKey:10,
+            columns: [
+                {
+                    field: 'client_ip',
+                    label: 'CLIENT IP',
+                    thClass: 'text-left'
+                },
+                {
+                    field: 'remote_user',
+                    label: 'REMOTE USER',
+                    thClass: 'text-left'
+                },
+                {
+                    field: 'date_time',
+                    label: 'DATE & TIME',
+                    thClass: 'text-left'
+                },
+                {
+                    field: 'request',
+                    label: 'REQUEST',
+                    thClass: 'text-left'
+                },
+                {
+                    field: 'target_status_code',
+                    label: 'TARGET STATUS CODE',
+                    numeric: true,
+                    thClass: 'text-left'
+                },
+                {
+                    field: 'body_bytes_sent',
+                    label: 'BODY BYTES SENT',
+                    numeric: true,
+                    thClass: 'text-left'
+                },
+                {
+                    field: 'referer',
+                    label: 'REFERER',
+                    thClass: 'text-left'
+                },
+                {
+                    field: 'user_agent',
+                    label: 'USER AGENT',
+                    thClass: 'text-left'
+                },
+                {
+                    field: 'ssl_protocol',
+                    label: 'SSL PROTOCOL',
+                    thClass: 'text-left'
+                },
+                {
+                    field: 'ssl_cipher',
+                    label: 'SSL CIPHER',
+                    thClass: 'text-left'
+                },
+                {
+                    field: 'request_processingtime',
+                    label: 'REQUEST PROCESSING TIME',
+                    numeric: true,
+                    thClass: 'text-left'
+                },
+                {
+                    field: 'target_processingtime',
+                    label: 'TARGET PROCESSING TIME',
+                    numeric: true,
+                    thClass: 'text-left'
+                },
+                {
+                    field: 'received_bytes',
+                    label: 'RECEIVED BYTES',
+                    numeric: true,
+                    thClass: 'text-left'
+                },
+                {
+                    field: 'target_ip_port',
+                    label: 'TARGET IP:PORT',
+                    thClass: 'text-left'
+                },
+                {
+                    field: 'statuscode_from_loadbalancer',
+                    label: 'STATUS CODE FROM LOAD BALANCER',
+                    numeric: true,
+                    thClass: 'text-left'
+                },
+                {
+                    field: 'bytes_sent',
+                    label: 'BYTES SENT',
+                    numeric: true,
+                    thClass: 'text-left'
+                },
+                {
+                    field: 'sni_domain',
+                    label: 'SNI DOMAIN',
+                    thClass: 'text-left'
+                },
+                {
+                    field: 'host',
+                    label: 'HOST',
+                    thClass: 'text-left'
+                },
+                {
+                    field: 'uri',
+                    label: 'URI',
+                    thClass: 'text-left'
+                },
+                {
+                    field: 'http_upgrade',
+                    label: 'HTTP UPGRADE',
+                    thClass: 'text-left'
+                }
+            ]
+        };
     },
     methods: {
-      showIndividualData(row) {
-        this.drawerData = Object.entries(row).map(([key, value]) => ({ key, value }));
-        this.drawerVisible = true;
-      },
+        addData(jsonObject, tableType) {
+             console.log(jsonObject)
+            if (jsonObject && Object.keys(jsonObject).length > 0) {
+                const objDet = {
+                    client_ip: jsonObject.client_ip,
+                    remote_user: jsonObject.remote_user,
+                    date_time: jsonObject.date_time,
+                    request: jsonObject.request,
+                    target_status_code: jsonObject.target_status_code,
+                    body_bytes_sent: jsonObject.body_bytes_sent,
+                    referer: jsonObject.referer,
+                    user_agent: jsonObject.user_agent,
+                    ssl_protocol: jsonObject.ssl_protocol,
+                    ssl_cipher: jsonObject.ssl_cipher,
+                    request_processingtime: jsonObject.request_processingtime,
+                    target_processingtime: jsonObject.target_processingtime,
+                    received_bytes: jsonObject.received_bytes,
+                    target_ip_port: jsonObject.target_ip_port,
+                    statuscode_from_loadbalancer: jsonObject.statuscode_from_loadbalancer,
+                    bytes_sent: jsonObject.bytes_sent,
+                    sni_domain: jsonObject.sni_domain,
+                    host: jsonObject.host,
+                    uri: jsonObject.uri,
+                    http_upgrade: jsonObject.http_upgrade,
+
+                };
+                if (tableType === 'live') {
+                    if(this.liveTableData.length >= 10){
+                        this.liveTableData.pop();
+                    }
+                    this.liveTableData.unshift(objDet)
+                    //console.log(this.liveTableData);
+                } else {
+                    // console.log(objDet)
+                    this.logsTableData.unshift(objDet)
+                }
+
+            }
+        },
+
+
+        handleDataReceived(data) {
+            // console.log("Received data from WebSocket:", data);
+            this.addData(data, "live");
+        },
+
+        async fetchLogsDataFromChild(offset) {
+            try {
+                const jsonArray = await getLogs("nginx_logs", offset);
+                console.log(jsonArray);
+
+                if (!jsonArray || jsonArray === '') {
+                    console.log("Empty JSON string comes.....");
+                } else {
+                    jsonArray.map(jsonString => this.addData(JSON.parse(jsonString), 'logs'));
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        },
+        logTabChange(){
+            this.liveTableData = [];
+            this.logsTableData = [];
+        },
+        async getPrimKey(){
+            this.primaryKey =  await getPrimaryKey("nginx_logs");
+        }
     },
-  };
-  </script>
+    async created() {
+        connectWebSocket(this.handleDataReceived, "nginx_logs");
+    },
+    beforeDestroy() {
+        closeWebSocket();
+    }
+};
+</script>
   
-  <style>
-  /* Add your custom styles here */
-  </style>
+<style scoped>
+.table-heading {
+    font-size: 25px;
+    margin-bottom: 30px;
+}
+</style>
+  

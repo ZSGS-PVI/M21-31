@@ -1,7 +1,7 @@
 <template>
     <div class="">
-        <h1 class="table-heading">Redis Logs</h1>
-        <TableView :liveTableData="liveTableData" :logsTableData="logsTableData" :primaryKey="primaryKey" :columns="columns"
+        <h1 class="table-heading">Docker Logs</h1>
+        <TableView :liveTableData="liveTableData" :logsTableData="logsTableData" :columns="columns"
             @fetch-logs-data="fetchLogsDataFromChild" @tab-change="logTabChange" @get-key="getPrimKey"/>
     </div>
 </template>
@@ -18,7 +18,6 @@ export default {
         return {
             liveTableData: [],
             logsTableData: [],
-            primaryKey:0,
             columns: [
                 {
                     field: 'timestamp',
@@ -28,21 +27,33 @@ export default {
                     thClass: 'text-left'
                 },
                 {
-                    field: 'addr_details',
-                    label: 'ADDR DETAILS',
+                    field: 'ip',
+                    label: 'IP',
                     width: '20%',
                     thClass: 'text-center'
                 },
                 {
-                    field: 'command',
-                    label: 'COMMAND',
+                    field: 'method',
+                    label: 'METHOD',
                     width: '20%',
                     thClass: 'text-center'
                 },
                 {
-                    field: 'content',
-                    label: 'CONTENT',
-                    width: '40%',
+                    field: 'endpoint',
+                    label: 'ENDPOINT',
+                    width: '20%',
+                    thClass: 'text-center'
+                },
+                {
+                    field: 'status_code',
+                    label: 'STATUS CODE',
+                    width: '10%',
+                    thClass: 'text-center'
+                },
+                {
+                    field: 'user_agent',
+                    label: 'USER AGENT',
+                    width: '10%',
                     thClass: 'text-center'
                 }
             ],
@@ -50,13 +61,15 @@ export default {
     },
     methods: {
         addData(jsonObject, tableType) {
-            //  console.log(jsonObject)
+             console.log(jsonObject)
             if (jsonObject && Object.keys(jsonObject).length > 0) {
                 const objDet = {
                     timestamp: jsonObject.timestamp,
-                    addr_details: `ip: ${jsonObject.addr_details.ip}, port:${jsonObject.addr_details.port}`,
-                    command: jsonObject.command,
-                    content: `ID: ${jsonObject.content.id}, DEPT: ${jsonObject.content.dept}, NAME: ${jsonObject.content.name}, SALARY: ${jsonObject.content.salary}`
+                    ip: jsonObject.ip,
+                    method: jsonObject.method,
+                    endpoint: jsonObject.endpoint,
+                    status_code: jsonObject.status_code,
+                    user_agent: jsonObject.user_agent
                 };
                 if (tableType === 'live') {
                     if(this.liveTableData.length >= 10){
@@ -80,7 +93,7 @@ export default {
 
         async fetchLogsDataFromChild(offset) {
             try {
-                const jsonArray = await getLogs("redis_logs", offset);
+                const jsonArray = await getLogs("docker_logs", offset);
                 console.log(jsonArray);
 
                 if (!jsonArray || jsonArray === '') {
@@ -97,11 +110,11 @@ export default {
             this.logsTableData = [];
         },
         async getPrimKey(){
-            this.primaryKey =  await getPrimaryKey("redis_logs");
+            this.primaryKey =  await getPrimaryKey("docker_logs");
         }
     },
-    async created() {
-        connectWebSocket(this.handleDataReceived, "redis_logs");
+    created() {
+        connectWebSocket(this.handleDataReceived, "docker_logs");
     },
     beforeDestroy() {
         closeWebSocket();
@@ -115,4 +128,3 @@ export default {
     margin-bottom: 30px;
 }
 </style>
-  

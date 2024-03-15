@@ -56,8 +56,19 @@ export const getLogs = async (tableName, offset) => {
         return data;
     } catch (error) {
         console.error(error);
-        throw error; // re-throw the error to propagate it to the caller
+        throw error;
     }
 
 }
 
+export const getPrimaryKey = async (tableName) => {
+    try {
+        const response = await axios.get(`http://localhost:8087/RedisWebSoc/getprimkey?table=${tableName}`);
+        const key = await response.data;
+        //console.log(key);
+        return key;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+}

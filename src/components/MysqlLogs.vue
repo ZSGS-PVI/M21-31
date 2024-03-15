@@ -2,13 +2,13 @@
   <div class="">
     <h1 class="table-heading">Mysql Logs</h1>
     <TableView :liveTableData="liveTableData" :logsTableData="logsTableData" :columns="columns"
-      @fetch-logs-data="fetchLogsDataFromChild" @tab-change="logTabChange" />
+      @fetch-logs-data="fetchLogsDataFromChild" @tab-change="logTabChange" @get-key="getPrimKey" />
   </div>
 </template>
-  
+
 <script>
 import TableView from "./TableView.vue";
-import { connectWebSocket, closeWebSocket, getLogs } from "../websoc";
+import { connectWebSocket, closeWebSocket, getLogs, getPrimaryKey } from "../websoc";
 
 export default {
   components: {
@@ -70,9 +70,9 @@ export default {
       this.addData(data, "live");
     },
 
-    async fetchLogsDataFromChild() {
+    async fetchLogsDataFromChild(offset) {
       try {
-        const jsonArray = await getLogs("mysql_logs"); // Adjust the log type here
+        const jsonArray = await getLogs("mysql_logs", offset); 
         console.log(jsonArray);
 
         if (!jsonArray || jsonArray === "") {
@@ -87,17 +87,20 @@ export default {
     logTabChange() {
       this.liveTableData = [];
       this.logsTableData = [];
+    },
+    async getPrimKey() {
+      this.primaryKey = await getPrimaryKey("mysql_logs");
     }
   },
   created() {
-    connectWebSocket(this.handleDataReceived, "mysql_logs"); // Adjust the log type here
+    connectWebSocket(this.handleDataReceived, "mysql_logs"); 
   },
   beforeDestroy() {
     closeWebSocket();
   },
 };
 </script>
-  
+
 <style scoped>
 .table-heading {
   font-size: 25px;

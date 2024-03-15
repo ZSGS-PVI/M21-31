@@ -3,9 +3,9 @@ import VueRouter from 'vue-router'
 import RedisLogTable from '@/components/RedisLogTable'
 import MysqlLogs from '@/components/MysqlLogs'
 import NjinixLogs from '@/components/NjinixLogs'
-import VirtualBoxLogs from '@/components/VirtualBoxLogs'
+import KVMLogs from '@/components/KVMLogs.vue'
 import DNSLogs from "@/components/DNSLogs"
-
+import DockerLogs from "@/components/DockerLogs.vue"
 
 Vue.use(VueRouter)
 
@@ -27,14 +27,19 @@ export default new VueRouter({
         component: MysqlLogs
       },
       {
-        path: '/vbox-logs',
+        path: '/kvm-logs',
         name: 'VirtualBoxLogs',
-        component: VirtualBoxLogs
+        component: KVMLogs
       },
       {
         path: '/dns-logs',
         name: 'DNSLogs',
         component: DNSLogs
+      },
+      {
+        path: '/docker-logs',
+        name: 'DockerLogs',
+        component: DockerLogs
       },
   ]
 })
