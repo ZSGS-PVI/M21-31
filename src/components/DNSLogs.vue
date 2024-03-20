@@ -8,7 +8,7 @@
   
 <script>
 import TableView from "./TableView.vue";
-import { connectWebSocket, closeWebSocket, getLogs, getPrimaryKey } from "../websoc";
+import { connectWebSocket, getLogs, getPrimaryKey } from "../websoc";
 
 export default {
     components: {
@@ -18,7 +18,6 @@ export default {
         return {
             liveTableData: [],
             logsTableData: [],
-            primaryKey:10,
             columns: [
                 {
                     field: 'timestamp',
@@ -62,7 +61,7 @@ export default {
                     this.liveTableData.unshift(objDet)
                 } else {
                     console.log(objDet)
-                    this.logsTableData.unshift(objDet)
+                    this.logsTableData.push(objDet)
                 }
 
             }
@@ -70,7 +69,7 @@ export default {
 
 
         handleDataReceived(data) {
-            console.log("Received data from WebSocket:", data);
+           // console.log("Received data from WebSocket:", data);
             this.addData(data, "live");
         },
 
@@ -92,16 +91,15 @@ export default {
             this.liveTableData = [];
             this.logsTableData = [];
         },
-        async getPrimKey(){
-            this.primaryKey =  await getPrimaryKey("dns_logs");
+        async getPrimKey(callback) {
+            const pmKey = await getPrimaryKey("dns_logs");
+            callback(pmKey);
         }
     },
-    created() {
-        connectWebSocket(this.handleDataReceived, "dns_logs");
-    },
-    beforeDestroy() {
-        closeWebSocket();
-    }
+   created(){
+    console.log("called");
+    connectWebSocket(this.handleDataReceived, "dns_logs")
+   }
 };
 </script>
   

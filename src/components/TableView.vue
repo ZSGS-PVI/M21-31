@@ -3,9 +3,9 @@
         <div class="row">
             <div class="col-md-12">
                 <div v-if="activeTab === 1" class="logs-count-para">
-                    <p>{{ logsCount }} logs are generated at {{ logsGTime }}, want live press <a>
-                        <button
-                                @click="getliveData" style="border: none; color: blue;">here</button></a></p>
+                    <p>{{ logsCount }} logs are generated at {{ logsGTime }}, want latest data? press
+                        <a @click="getliveData" style="color: blue;">here</a>
+                    </p>
                 </div>
                 <b-tabs ref="tabs" v-model="activeTab">
                     <TabItem label="Live" :data="filteredLiveTableData" :columns="filteredColumns" class="custom-table"
@@ -19,7 +19,6 @@
                 </div>
             </div>
         </div>
-
         <el-drawer v-if="drawerVisible" :visible.sync="drawerVisible" direction="rtl" size="40%"
             @close="drawerVisible = false">
             <div style="padding: 20px;">
@@ -36,65 +35,47 @@
 import TabItem from '../components/TabItem.vue'
 
 export default {
-    components: {
-        TabItem
-    },
+    components: { TabItem },
+    props: ['columns', 'liveTableData', 'logsTableData'],
     data() {
         return {
             logsCount: '0',
             logsGTime: '',
             activeTab: 0,
-            offset: 1,
+            primaryKey:0,
+            offset: 0,
             drawerVisible: false,
-            drawerData: [],
             selectedRow: null,
             columnsThreshold: 5,
         };
     },
-    props: ['columns', 'liveTableData', 'logsTableData', 'primaryKey'],
     computed: {
         filteredColumns() {
-            let filteredCols = this.columns.slice(0, this.columnsThreshold);
+            const filteredCols = this.columns.slice(0, this.columnsThreshold);
             if (this.hasMoreInfoColumn(this.columns)) {
                 filteredCols.push({ label: 'More Info', field: 'more_info', slotName: 'moreInfoButton' });
             }
             return filteredCols;
-        }
-        ,
+        },
         filteredLiveTableData() {
-            return this.liveTableData.map(row => {
-                let newRow = {};
-                this.columns.slice(0, this.columnsThreshold).forEach(col => {
-                    newRow[col.field] = row[col.field];
-                });
-                return newRow;
-            });
+            return this.filterTableData(this.liveTableData);
         },
         filteredLogsTableData() {
-            return this.logsTableData.map(row => {
-                let newRow = {};
-                this.columns.slice(0, this.columnsThreshold).forEach(col => {
-                    newRow[col.field] = row[col.field];
-                });
-                return newRow;
-            });
+            return this.filterTableData(this.logsTableData);
         },
     },
     watch: {
         activeTab() {
-            this.emitTabChange();
+            // this.emitTabChange();
             if (this.activeTab === 1) {
+                console.log("ac")
                 this.assignCurrrentTime();
                 this.emitGetKey();
-                // console.log(this.offset);
-                this.emitFetchLogsData(this.offset);
             }
         },
-        primaryKey(newValue) {
+        offset() {
             if (this.activeTab === 1) {
-                this.offset = newValue;
-                this.callParentM();
-                this.getLogsCount();
+                this.callParentM(); 
             }
         }
     },
@@ -102,57 +83,61 @@ export default {
         assignCurrrentTime() {
             const curDate = new Date();
             const hours = curDate.getHours();
-            const amPm = hours >= 12 ? 'PM' : 'AM'; 
-            const hour12 = hours % 12 || 12; 
+            const amPm = hours >= 12 ? 'PM' : 'AM';
+            const hour12 = hours % 12 || 12;
             const minutes = curDate.getMinutes();
             const seconds = curDate.getSeconds();
             const date = curDate.getDate();
-            const month = curDate.getMonth() + 1; 
+            const month = curDate.getMonth() + 1;
             const year = curDate.getFullYear();
-            this.logsGTime = date + "-" + month + "-" + year + " / " + hour12 + ":" +
-                (minutes < 10 ? '0' + minutes : minutes) + ":" +
-                (seconds < 10 ? '0' + seconds : seconds) + " " + amPm;
+            this.logsGTime = `${date}-${month}-${year} / ${hour12}:${minutes < 10 ? '0' + minutes : minutes}:${seconds < 10 ? '0' + seconds : seconds} ${amPm}`;
         },
-
         getLogsCount() {
-            this.logsCount = this.primaryKey % 1000 != 0 ? Math.round(this.primaryKey / 1000) + "k" : Math.round(this.primaryKey / 1000);
+            this.logsCount = this.primaryKey >= 1000  ? Math.round(this.primaryKey / 1000) + "k" : this.primaryKey;
         },
         prevPage() {
             if (this.offset < this.primaryKey) {
                 this.offset += 10;
             }
-            this.callParentM();
         },
         nextPage() {
             if (this.offset >= 10) {
                 this.offset -= 10;
             }
-            this.callParentM();
         },
         callParentM() {
             this.emitTabChange();
             this.emitFetchLogsData(this.offset);
+            this.getLogsCount();
         },
         getliveData() {
             this.assignCurrrentTime();
             this.emitGetKey();
-            this.callParentM();
         },
         emitTabChange() {
             this.$emit('tab-change');
         },
         emitGetKey() {
-            this.$emit('get-key');
+            this.$emit('get-key', (primaryKey) => {
+                this.primaryKey = primaryKey;
+                this.offset = this.primaryKey;
+            });
         },
+
         emitFetchLogsData(offset) {
             this.$emit('fetch-logs-data', offset);
         },
         hasMoreInfoColumn(columns) {
             return columns.length > this.columnsThreshold;
         },
-        handleMoreInfoClick(row) {
-            this.selectedRow = row;
-            this.drawerVisible = true;
+        filterTableData(data) {
+            return data.map(row => {
+                const newRow = {};
+                this.columns.slice(0, this.columnsThreshold).forEach(col => {
+                    newRow[col.field] = row[col.field];
+                });
+                return newRow;
+            });
         },
         showRowDetails(row) {
             this.selectedRow = row;

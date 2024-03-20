@@ -1,14 +1,14 @@
 <template>
     <div class="">
         <h1 class="table-heading">Nginx Logs</h1>
-        <TableView :liveTableData="liveTableData" :logsTableData="logsTableData" :primaryKey="primaryKey" :columns="columns"
-            @fetch-logs-data="fetchLogsDataFromChild" @tab-change="logTabChange" @get-key="getPrimKey"/>
+        <TableView :liveTableData="liveTableData" :logsTableData="logsTableData" :columns="columns"
+            @fetch-logs-data="fetchLogsDataFromChild" @tab-change="logTabChange" @get-key="getPrimKey" />
     </div>
 </template>
-  
+
 <script>
 import TableView from "./TableView.vue";
-import { connectWebSocket, closeWebSocket, getLogs, getPrimaryKey} from "../websoc";
+import { connectWebSocket, getLogs, getPrimaryKey } from "../websoc";
 
 export default {
     components: {
@@ -18,7 +18,6 @@ export default {
         return {
             liveTableData: [],
             logsTableData: [],
-            primaryKey:10,
             columns: [
                 {
                     field: 'client_ip',
@@ -132,7 +131,7 @@ export default {
     },
     methods: {
         addData(jsonObject, tableType) {
-             console.log(jsonObject)
+            console.log(jsonObject)
             if (jsonObject && Object.keys(jsonObject).length > 0) {
                 const objDet = {
                     client_ip: jsonObject.client_ip,
@@ -158,14 +157,14 @@ export default {
 
                 };
                 if (tableType === 'live') {
-                    if(this.liveTableData.length >= 10){
+                    if (this.liveTableData.length >= 10) {
                         this.liveTableData.pop();
                     }
                     this.liveTableData.unshift(objDet)
                     //console.log(this.liveTableData);
                 } else {
                     // console.log(objDet)
-                    this.logsTableData.unshift(objDet)
+                    this.logsTableData.push(objDet)
                 }
 
             }
@@ -191,27 +190,25 @@ export default {
                 console.error(error);
             }
         },
-        logTabChange(){
+        logTabChange() {
             this.liveTableData = [];
             this.logsTableData = [];
         },
-        async getPrimKey(){
-            this.primaryKey =  await getPrimaryKey("nginx_logs");
+        async getPrimKey(callback) {
+            const pmKey = await getPrimaryKey("nginx_logs");
+            callback(pmKey);
         }
     },
-    async created() {
-        connectWebSocket(this.handleDataReceived, "nginx_logs");
-    },
-    beforeDestroy() {
-        closeWebSocket();
-    }
+    created(){
+        console.log("nginx created called");
+    connectWebSocket(this.handleDataReceived, "nginx_logs")
+   }
 };
 </script>
-  
+
 <style scoped>
 .table-heading {
     font-size: 25px;
     margin-bottom: 30px;
 }
 </style>
-  

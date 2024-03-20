@@ -7,6 +7,7 @@ let onDataReceivedCallback = null;
 export const connectWebSocket = (callback, params) => {
     onDataReceivedCallback = callback;
 
+    closeWebSocket("dfgh");
     if (!socket) {
         socket = new WebSocket(`ws://localhost:8087/RedisWebSoc/clientws?type=${params}`);
 
@@ -16,6 +17,7 @@ export const connectWebSocket = (callback, params) => {
 
         socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
+            // console.log(data);
             onDataReceivedCallback(data);
         };
 
@@ -38,9 +40,11 @@ export const sendWebSocketMessage = (message) => {
     }
 };
 
-export const closeWebSocket = () => {
+export const closeWebSocket = (compName) => {
     if (socket) {
         socket.close();
+        console.log(compName, " close con");
+        socket = null;
     }
 };
 
@@ -65,7 +69,7 @@ export const getPrimaryKey = async (tableName) => {
     try {
         const response = await axios.get(`http://localhost:8087/RedisWebSoc/getprimkey?table=${tableName}`);
         const key = await response.data;
-        //console.log(key);
+        // console.log(key);
         return key;
     } catch (error) {
         console.error(error);

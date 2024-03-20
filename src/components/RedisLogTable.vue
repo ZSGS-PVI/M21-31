@@ -1,14 +1,14 @@
 <template>
     <div class="">
         <h1 class="table-heading">Redis Logs</h1>
-        <TableView :liveTableData="liveTableData" :logsTableData="logsTableData" :primaryKey="primaryKey" :columns="columns"
-            @fetch-logs-data="fetchLogsDataFromChild" @tab-change="logTabChange" @get-key="getPrimKey"/>
+        <TableView :liveTableData="liveTableData" :logsTableData="logsTableData" :columns="columns"
+            @fetch-logs-data="fetchLogsDataFromChild" @tab-change="logTabChange" @get-key="getPrimKey" />
     </div>
 </template>
-  
+
 <script>
 import TableView from "./TableView.vue";
-import { connectWebSocket, closeWebSocket, getLogs, getPrimaryKey} from "../websoc";
+import { connectWebSocket, getLogs, getPrimaryKey } from "../websoc";
 
 export default {
     components: {
@@ -18,7 +18,7 @@ export default {
         return {
             liveTableData: [],
             logsTableData: [],
-            primaryKey:0,
+            // primaryKey: 0,
             columns: [
                 {
                     field: 'timestamp',
@@ -59,14 +59,14 @@ export default {
                     content: `ID: ${jsonObject.content.id}, DEPT: ${jsonObject.content.dept}, NAME: ${jsonObject.content.name}, SALARY: ${jsonObject.content.salary}`
                 };
                 if (tableType === 'live') {
-                    if(this.liveTableData.length >= 10){
+                    if (this.liveTableData.length >= 10) {
                         this.liveTableData.pop();
                     }
                     this.liveTableData.unshift(objDet)
                     //console.log(this.liveTableData);
                 } else {
                     // console.log(objDet)
-                    this.logsTableData.unshift(objDet)
+                    this.logsTableData.push(objDet)
                 }
 
             }
@@ -81,7 +81,7 @@ export default {
         async fetchLogsDataFromChild(offset) {
             try {
                 const jsonArray = await getLogs("redis_logs", offset);
-                console.log(jsonArray);
+                // console.log(jsonArray);
 
                 if (!jsonArray || jsonArray === '') {
                     console.log("Empty JSON string comes.....");
@@ -92,27 +92,25 @@ export default {
                 console.error(error);
             }
         },
-        logTabChange(){
+        logTabChange() {
             this.liveTableData = [];
             this.logsTableData = [];
         },
-        async getPrimKey(){
-            this.primaryKey =  await getPrimaryKey("redis_logs");
+        async getPrimKey(callback) {
+            const pmKey = await getPrimaryKey("redis_logs");
+            callback(pmKey);
         }
     },
-    async created() {
-        connectWebSocket(this.handleDataReceived, "redis_logs");
-    },
-    beforeDestroy() {
-        closeWebSocket();
-    }
+    created(){
+        console.log("redis created called");
+    connectWebSocket(this.handleDataReceived, "redis_logs")
+   }
 };
 </script>
-  
+
 <style scoped>
 .table-heading {
     font-size: 25px;
     margin-bottom: 30px;
 }
 </style>
-  

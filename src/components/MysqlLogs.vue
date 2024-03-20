@@ -8,7 +8,7 @@
 
 <script>
 import TableView from "./TableView.vue";
-import { connectWebSocket, closeWebSocket, getLogs, getPrimaryKey } from "../websoc";
+import { connectWebSocket, getLogs, getPrimaryKey } from "../websoc";
 
 export default {
   components: {
@@ -59,20 +59,20 @@ export default {
         if (tableType === 'live') {
           this.liveTableData.unshift(objDet)
         } else {
-          console.log(objDet)
-          this.logsTableData.unshift(objDet)
+          // console.log(objDet)
+          this.logsTableData.push(objDet)
         }
       }
     },
 
     handleDataReceived(data) {
-      console.log("Received data from WebSocket:", data);
+      // console.log("Received data from WebSocket:", data);
       this.addData(data, "live");
     },
 
     async fetchLogsDataFromChild(offset) {
       try {
-        const jsonArray = await getLogs("mysql_logs", offset); 
+        const jsonArray = await getLogs("mysql_logs", offset);
         console.log(jsonArray);
 
         if (!jsonArray || jsonArray === "") {
@@ -88,16 +88,15 @@ export default {
       this.liveTableData = [];
       this.logsTableData = [];
     },
-    async getPrimKey() {
-      this.primaryKey = await getPrimaryKey("mysql_logs");
+    async getPrimKey(callback) {
+      const pmKey = await getPrimaryKey("mysql_logs");
+      callback(pmKey);
     }
   },
-  created() {
-    connectWebSocket(this.handleDataReceived, "mysql_logs"); 
-  },
-  beforeDestroy() {
-    closeWebSocket();
-  },
+  created(){
+    console.log("mysql created called");
+    connectWebSocket(this.handleDataReceived, "mysql_logs")
+   }
 };
 </script>
 

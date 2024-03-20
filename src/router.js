@@ -22,24 +22,27 @@ export default new VueRouter({
       component: NjinixLogs
     },
     {
-        path: '/mysql-logs',
-        name: 'MySqlLogs',
-        component: MysqlLogs
-      },
-      {
-        path: '/kvm-logs',
-        name: 'VirtualBoxLogs',
-        component: KVMLogs
-      },
-      {
-        path: '/dns-logs',
-        name: 'DNSLogs',
-        component: DNSLogs
-      },
-      {
-        path: '/docker-logs',
-        name: 'DockerLogs',
-        component: DockerLogs
-      },
+      path: '/mysql-logs',
+      name: 'MySqlLogs',
+      component: MysqlLogs
+    },
+    {
+      path: '/kvm-logs',
+      name: 'VirtualBoxLogs',
+      component: KVMLogs
+    },
+    {
+      path: '/dns-logs',
+      name: 'DNSLogs',
+      component: DNSLogs,
+
+    },
+    {
+      path: '/docker-logs',
+      name: 'DockerLogs',
+      component: DockerLogs
+    },
   ]
 })
+
+

@@ -2,13 +2,13 @@
     <div class="">
         <h1 class="table-heading">Kvm Logs</h1>
         <TableView :liveTableData="liveTableData" :logsTableData="logsTableData" :columns="columns"
-            @fetch-logs-data="fetchLogsDataFromChild" @tab-change="logTabChange" @get-key="getPrimKey"/>
+            @fetch-logs-data="fetchLogsDataFromChild" @tab-change="logTabChange" @get-key="getPrimKey" />
     </div>
 </template>
-  
+
 <script>
 import TableView from "./TableView.vue";
-import { connectWebSocket, closeWebSocket, getLogs, getPrimaryKey} from "../websoc";
+import { connectWebSocket, getLogs, getPrimaryKey } from "../websoc";
 
 export default {
     components: {
@@ -119,15 +119,14 @@ export default {
                     capname: jsonObject.capname,
                     auditEpoch: jsonObject.audit_epoch,
                     timestampEpoch: jsonObject.timestamp_epoch
-                    // Add more fields as necessary
                 };
                 if (tableType === 'live') {
-                    if(this.liveTableData.length >= 10){
+                    if (this.liveTableData.length >= 10) {
                         this.liveTableData.pop();
                     }
                     this.liveTableData.unshift(objDet)
                 } else {
-                    this.logsTableData.unshift(objDet)
+                    this.logsTableData.push(objDet)
                 }
             }
         },
@@ -150,23 +149,22 @@ export default {
                 console.error(error);
             }
         },
-        logTabChange(){
+        logTabChange() {
             this.liveTableData = [];
             this.logsTableData = [];
         },
-        async getPrimKey(){
-            this.primaryKey =  await getPrimaryKey("kvm_logs");
+        async getPrimKey(callback) {
+            const pmKey = await getPrimaryKey("kvm_logs");
+            callback(pmKey);
         }
     },
-    created() {
-        connectWebSocket(this.handleDataReceived, "kvm_logs");
-    },
-    beforeDestroy() {
-        closeWebSocket();
-    }
+    created(){
+        console.log("kvm created called");
+    connectWebSocket(this.handleDataReceived, "kvm_logs")
+   }
 };
 </script>
-  
+
 <style scoped>
 .table-heading {
     font-size: 25px;
