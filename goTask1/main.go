@@ -18,32 +18,32 @@ type NginxLogEntry struct {
 }
 
 type LogEntry struct {
-	RemoteAddr       string `json:"CLIENT IP"`
-	RemoteUser       string `json:"REMOTE USER"`
-	TimeLocal        string `json:"DATE & TIME"`
-	Request          string `json:"REQUEST"`
-	Status           int    `json:"TARGET STATUS CODE"`
-	BodyBytesSent    int    `json:"BODY BYTES SENT"`
-	Referer          string `json:"REFERER"`
-	UserAgent        string `json:"USER AGENT"`
-	SslProtocol      string `json:"SSL PROTOCOL"`
-	SslCipher        string `json:"SSL CIPHER"`
-	RequestTime      string `json:"REQUEST PROCESSING TIME"`
-	UpstreamRespTime string `json:"TARGET PROCESSING TIME"`
-	RequestLength    int    `json:"RECEIVED BYTES"`
-	UpstreamAddr     string `json:"TARGET IP:PORT"`
-	UpstreamStatus   int    `json:"STATUS CODE FROM LOAD BALANCER"`
-	BytesSent        int    `json:"BYTES SENT"`
-	ServerName       string `json:"SNI DOMAIN"`
-	Host             string `json:"HOST"`
-	RequestURI       string `json:"URI"`
-	HttpUpgrade      string `json:"HTTP UPGRADE"`
+	RemoteAddr       string `json:"client_ip"`
+	RemoteUser       string `json:"remote_user"`
+	TimeLocal        string `json:"date_time"`
+	Request          string `json:"request"`
+	Status           int    `json:"target_status_code"`
+	BodyBytesSent    int    `json:"body_bytes_sent"`
+	Referer          string `json:"referer"`
+	UserAgent        string `json:"user_agent"`
+	SslProtocol      string `json:"ssl_protocol"`
+	SslCipher        string `json:"ssl_cipher"`
+	RequestTime      string `json:"request_processingtime"`
+	UpstreamRespTime string `json:"target_processingtime"`
+	RequestLength    int    `json:"received_bytes"`
+	UpstreamAddr     string `json:"target_ip_port"`
+	UpstreamStatus   int    `json:"statuscode_from_loadbalancer"`
+	BytesSent        int    `json:"bytes_sent"`
+	ServerName       string `json:"sni_domain"`
+	Host             string `json:"host"`
+	RequestURI       string `json:"uri"`
+	HttpUpgrade      string `json:"http_upgrade"`
 }
 
 var (
-	lastOffset          int64
-	processedLogEntries = make(map[string]struct{})
-	mutex               sync.Mutex
+	lastOffset    int64
+	mutex         sync.Mutex
+	totalLogsSent int
 )
 
 func main() {
@@ -64,6 +64,9 @@ func main() {
 	for range ticker.C {
 		processLogFile(logFilePath, conn)
 	}
+
+	// Print the total number of logs sent
+	//fmt.Println("Total logs sent:", totalLogsSent)
 }
 
 // processLogFile reads the Nginx access log file, parses log entries, and sends them over WebSocket
@@ -84,29 +87,8 @@ func processLogFile(logFilePath string, conn *websocket.Conn) {
 			continue
 		}
 
-		// Check if log entry has already been processed
-		entryID := getLogEntryID(logEntry)
-		if isProcessed(entryID) {
-			continue
-		}
-
-		// Convert log entry to JSON with "nginx_logs" key
-		jsonData, err := json.Marshal(map[string]interface{}{"nginx_logs": logEntry})
-		if err != nil {
-			log.Printf("Error marshalling JSON: %v", err)
-			continue
-
-		}
-		fmt.Println(logEntry)
-		// Send the JSON data over WebSocket connection
-		err = conn.WriteMessage(websocket.TextMessage, jsonData)
-		if err != nil {
-			log.Println("write:", err)
-			break
-		}
-
-		// Mark log entry as processed
-		markProcessed(entryID)
+		sendLogEntry(logEntry, conn)
+		totalLogsSent++
 	}
 }
 
@@ -149,23 +131,22 @@ func parseLogEntry(line string) (LogEntry, error) {
 	return logEntry, nil
 }
 
-// getLogEntryID generates a unique identifier for a log entry
-func getLogEntryID(logEntry LogEntry) string {
-	// Customize this function to generate a unique identifier based on log entry fields
-	return logEntry.RemoteAddr + "-" + logEntry.TimeLocal + "-" + logEntry.RequestURI
-}
+// sendLogEntry sends a log entry over WebSocket
+func sendLogEntry(logEntry LogEntry, conn *websocket.Conn) {
+	// Convert log entry to JSON with "nginx_logs" key
+	jsonData, err := json.Marshal(map[string]interface{}{"nginx_logs": logEntry})
+	if err != nil {
+		log.Printf("Error marshalling JSON: %v", err)
+		return
+	}
 
-// isProcessed checks if a log entry has already been processed
-func isProcessed(entryID string) bool {
-	mutex.Lock()
-	defer mutex.Unlock()
-	_, ok := processedLogEntries[entryID]
-	return ok
-}
+	// Send the JSON data over WebSocket connection
+	err = conn.WriteMessage(websocket.TextMessage, jsonData)
+	if err != nil {
+		log.Println("write:", err)
+		return
+	}
 
-// markProcessed marks a log entry as processed
-func markProcessed(entryID string) {
-	mutex.Lock()
-	defer mutex.Unlock()
-	processedLogEntries[entryID] = struct{}{}
+	// Print the sent log entry
+	fmt.Println("Sent log entry:", logEntry)
 }
